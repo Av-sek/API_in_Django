@@ -49,6 +49,7 @@ class ProductDeleteAPIView(generics.DestroyAPIView):
         #instance
         super().perform_destroy(instance)
     
+class CreateAPIView(mixins.CreateModelMixin,)
 #Authentication
 class ProductMixinView(
     mixins.CreateModelMixin,
@@ -66,6 +67,13 @@ class ProductMixinView(
         return self.list(request,*args,**kwargs)
     def post(self,request,*args,**kwargs):
         return self.create(request,*args,**kwargs)
+    def perform_create(self,serializer):
+        # serializer.save(user=self.request.user)
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content') or None
+        if content is None:
+            content = "This is single view and i am loving it"
+        serializer.save(content = content)
 product_mixin_view = ProductMixinView.as_view()
 # @api_view(['GET','POST'])
 # def product_alt_view(request,pk=None,*args,**kwargs):
