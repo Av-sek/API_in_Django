@@ -1,10 +1,10 @@
 import requests
 
-endpoint = "http://localhost:8000/api/products/update/1/"
+endpoint = "http://localhost:8000/api/products/1/update/"
 
 
 data = {
-    'title':"New Hello World ",
+    'title':"Works UPdate ",
     'price':12.00
 }
 get_response = requests.put(
