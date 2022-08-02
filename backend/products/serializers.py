@@ -1,45 +1,35 @@
-
-from cgitb import lookup
-import email
-from pickletools import read_string1
-from wsgiref.validate import validator
+from api.serializers import UserPublicSerializer
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from .models import Product
 from .validators import validate_title_no_hello,unique_product_title
 
+
 class ProductSerializer(serializers.ModelSerializer):
-    my_discount = serializers.SerializerMethodField(read_only= True)
+    owner = UserPublicSerializer(source='user',read_only=True)
     edit_url = serializers.SerializerMethodField(read_only= True)
     url = serializers.HyperlinkedIdentityField(
         view_name='product-detail',
         lookup_field = 'pk'
         )
     title = serializers.CharField(validators=[validate_title_no_hello,unique_product_title])
-    name = serializers.CharField(source="title",read_only=True)
     class Meta:
         model = Product
         fields = [
-            #'user',
             'pk',
+            'owner',
             'edit_url',
             'url',
             'title',
-            "name",
             'content',
             'price',
             'sale_price',
-            'my_discount',
+            'public'
         ]
-
-    # def create(self,validated_data):
-    #     #email = validated_data.pop('email')
-    #     obj =  super().create(validated_data)
-    #     #print(email,obj)
-    #     return obj
-    # def update(self, instance, validated_data):
-    #     email = validated_data.pop('email')
-    #     return super().update(instance, validated_data)
+    def get_my_user_data(self,obj):
+        return {
+            "username": obj.user.username
+        }
     def get_edit_url(self,obj):
         request = self.context.get('request')
         if request is None:
@@ -49,7 +39,4 @@ class ProductSerializer(serializers.ModelSerializer):
             kwargs={'pk':obj.id},
             request=request
             )
-    def get_my_discount(self,obj):
-        if not hasattr(obj,'id'):
-            return None
-        return obj.get_discount()
+
